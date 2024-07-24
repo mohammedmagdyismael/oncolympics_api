@@ -2,8 +2,7 @@ const express = require('express');
 const userRoutes = require('./Routes/UserRoutes');
 const healthCheck = require('./Routes/HealthCheck');
 const app = express();
-const port = 3000;
-
+const PORT = process.env.PORT || 5000;
 // Middleware to parse JSON bodies
 app.use(express.json());
 
@@ -15,5 +14,5 @@ app.use('/api/users', userRoutes);
 
 // Start the server
 app.listen(port, () => {
-  console.log(`Server is running on http://localhost:${port}`);
+  console.log(`Server is running on http://localhost:${PORT}`);
 });
