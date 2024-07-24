@@ -1,6 +1,9 @@
 const express = require('express');
-const userRoutes = require('./Routes/UserRoutes');
+
 const healthCheck = require('./Routes/HealthCheck');
+const userRoutes = require('./Routes/UserRoutes');
+const groupsRoutes = require('./Routes/GroupRoutes');
+
 const app = express();
 const PORT = process.env.PORT || 5000;
 // Middleware to parse JSON bodies
@@ -12,6 +15,8 @@ app.get("/", (req, res) => res.send("Oncolymbics"));
 app.use('/api', healthCheck);
 // Use the user routes
 app.use('/api/users', userRoutes);
+// Use the groups routes
+app.use('/api/groups', groupsRoutes);
 
 // Start the server
 const server = app.listen(PORT, () => {
