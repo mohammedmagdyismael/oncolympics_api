@@ -17,7 +17,10 @@ exports.getAllMatches = async (req, res) => {
         JOIN Teams t2 ON m.team2_id = t2.id
         ORDER BY m.date_time
       `);
-      res.json(results);
+    res.json({
+        status: 200,
+        data: results
+    });
     } catch (error) {
       res.status(500).json({ error: error.message });
     }
