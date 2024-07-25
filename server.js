@@ -1,4 +1,5 @@
 const express = require('express');
+const cors = require('cors');
 
 const healthCheck = require('./Routes/HealthCheck');
 const userRoutes = require('./Routes/UserRoutes');
@@ -9,6 +10,8 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 // Middleware to parse JSON bodies
 app.use(express.json());
+app.use(cors());
+
 app.get("/", (req, res) => res.send("Oncolymbics"));
 
 /** Routes */
