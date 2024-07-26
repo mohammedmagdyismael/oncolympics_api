@@ -95,3 +95,30 @@ exports.updateMatchStatus = async (req, res) => {
       res.status(500).json({ error: 'Internal Server Error' });
     }
   };
+
+exports.incrementCurrentQuestion = async (req, res) => {
+    const token = req.headers.token;
+  
+    try {
+      // Verify user is Admin
+      const [user] = await db.query('SELECT role FROM Users WHERE token = ?', [token]);
+      if (user.length === 0 || user[0].role !== 'Admin') {
+        return res.status(403).json({ error: 'User is not authorized to perform this action' });
+      }
+  
+      // Increment current_question for the first match with status 0
+      const [matches] = await db.query('SELECT id FROM Matches WHERE match_status = 1 LIMIT 1');
+      
+      if (matches.length === 0) {
+        return res.status(404).json({ error: 'No match found with status 0' });
+      }
+  
+      const matchId = matches[0].id;
+      await db.query('UPDATE Matches SET current_question = current_question + 1 WHERE id = ?', [matchId]);
+  
+      res.status(200).json({ message: 'Current question index incremented successfully' });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: 'Internal Server Error' });
+    }
+  };

@@ -5,5 +5,7 @@ const matchController = require('../Controllers/MatchController');
 // Define the route to get groups with teams ordered by Pts
 router.get('/next-match', matchController.getNextMatch);
 router.post('/update-match-status', matchController.updateMatchStatus);
+router.get('/increment-current-question', matchController.incrementCurrentQuestion);
+
 
 module.exports = router;
