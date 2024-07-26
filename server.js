@@ -5,6 +5,7 @@ const healthCheck = require('./Routes/HealthCheck');
 const userRoutes = require('./Routes/UserRoutes');
 const groupsRoutes = require('./Routes/GroupRoutes');
 const standingsRoutes = require('./Routes/StandingRoutes');
+const matchRoutes = require('./Routes/MatchRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -23,6 +24,8 @@ app.use('/api/users', userRoutes);
 app.use('/api/groups', groupsRoutes);
 // Use the standings routes
 app.use('/api/standings', standingsRoutes);
+// Use the match routes
+app.use('/api/match', matchRoutes);
 
 // Start the server
 const server = app.listen(PORT, () => {
