@@ -143,11 +143,15 @@ const aggregateScores = async (matchId) => {
     team2_totalScore = team2_totalScore + mq.score_team2;
   });
 
+
   const aggregationValuesquery = `
     UPDATE Matches
-    SET score_team1 = ${team1_totalScore}, score_team1 = ${team2_totalScore} 
+    SET score_team1 = ${team1_totalScore}, score_team2 = ${team2_totalScore} 
     WHERE id = ${matchId};
   `;
+
+  console.log(aggregationValuesquery)
+
     
   await db.query(aggregationValuesquery);
 }
