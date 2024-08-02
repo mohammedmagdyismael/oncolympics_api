@@ -149,9 +149,6 @@ const aggregateScores = async (matchId) => {
     SET score_team1 = ${team1_totalScore}, score_team2 = ${team2_totalScore} 
     WHERE id = ${matchId};
   `;
-
-  console.log(aggregationValuesquery)
-
     
   await db.query(aggregationValuesquery);
 }
