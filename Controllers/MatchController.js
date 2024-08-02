@@ -31,7 +31,8 @@ exports.getNextMatchModerator = async (req, res) => {
           date_time,
           match_type,
           question_file,
-          match_status
+          match_status,
+          current_question
       FROM 
           Matches
       JOIN 
