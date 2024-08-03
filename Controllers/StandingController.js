@@ -4,6 +4,7 @@ exports.getAllMatches = async (req, res) => {
     try {
       const [results] = await db.query(`
         SELECT 
+          m.id as match_id,
           t1.name AS team1_name, 
           t1.id AS team1_id, 
           t1.logo AS team1_logo, 
