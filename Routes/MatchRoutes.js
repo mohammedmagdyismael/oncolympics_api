@@ -10,10 +10,15 @@ router.get('/moderatormatch', matchController.getNextMatchModerator);
 router.get('/startmatch', matchController.startMatch)
 router.get('/nextquestion', matchController.nextquestion)
 router.get('/endmatch', matchController.endMatch)
-router.get('/matchscores', matchController.matchScores)
+router.get('/stopanswer', matchController.stopAnswer) // Not Implemented
+
 
 // Team Player
-router.get('/playermatch');
-router.get('/answer');
+router.get('/playermatch', matchController.getNextMatchPlayer);
+router.post('/answer', matchController.setAnswer);
+
+// Both
+router.get('/matchscores', matchController.matchScores)
+
 
 module.exports = router;

@@ -2,6 +2,7 @@
 
 const db = require('../db'); // Assuming you have a database module for handling DB operations
 
+// Moderator
 exports.getNextMatchModerator = async (req, res) => {
   const token = req.headers.token;
 
@@ -93,7 +94,7 @@ exports.startMatch = async (req, res) => {
         // Change Match Status to 1
         const startmatchquery = `
           UPDATE Matches
-          SET match_status = 1
+          SET match_status = 1, canAnswer = 1
           WHERE id = ${matchId};
         `;
         await db.query(startmatchquery);
@@ -151,7 +152,9 @@ const aggregateScores = async (matchId) => {
   `;
     
   await db.query(aggregationValuesquery);
-}
+};
+
+const aggregateGroups = async () => {};
 
 exports.endMatch = async (req, res) => {
   const token = req.headers.token;
@@ -180,7 +183,7 @@ exports.endMatch = async (req, res) => {
 
       const query = `
         UPDATE Matches
-        SET match_status = 2
+        SET match_status = 2, canAnswer = 0
         WHERE id = ${matchId};
       `;
     
@@ -231,7 +234,7 @@ exports.nextquestion = async (req, res) => {
       const score_team1 = match[0].score_team1;
       const score_team2 = match[0].score_team2;
       // Update Question Index
-      await db.query('UPDATE Matches SET current_question = current_question + 1 WHERE id = ?', [matchId]);
+      await db.query('UPDATE Matches SET current_question = current_question + 1, canAnswer = 1 WHERE id = ?', [matchId]);
       
       // Create Question Record
       const questionExistQuery = `
@@ -264,39 +267,103 @@ exports.nextquestion = async (req, res) => {
     }
 };
 
+exports.stopAnswer = async (req, res) => {
+    const token = req.headers.token;
+    try {
+        // Verify user is Admin
+        const [user] = await db.query('SELECT * FROM Users WHERE token = ?', [token]);
+        if (user.length === 0 || user[0].role !== 'Admin') {
+          return res.status(403).json({ error: 'User is not authorized to perform this action' });
+        }
+
+        const userId = user[0].id;
+      
+        // Get match record
+        const matchRecord = `
+          SELECT 
+            *
+          FROM 
+              Matches
+          where Matches.id in (
+                  select currentMatchId from CurrentMatch where id = 0 AND matchAdmin = ${userId}
+          );
+        `;
+      const [match] = await db.query(matchRecord);
+      const matchId = match[0].id;
+
+      // Update Question Index
+      await db.query('UPDATE Matches SET canAnswer = 0 WHERE id = ?', [matchId]);
+
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: 'Internal Server Error' });
+    }
+}
+
 exports.matchScores = async (req, res) => {
   const token = req.headers.token;
 
   try {
     // Verify user is Admin
     const [user] = await db.query('SELECT * FROM Users WHERE token = ?', [token]);
-    if (user.length === 0 || user[0].role !== 'Admin') {
+    if (user.length === 0) {
       return res.status(403).json({ error: 'User is not authorized to perform this action' });
     }
     const userId = user[0].id;
 
     try {
       // Get match scores
-      const matchscoresRecord = `
-        SELECT 
-          MatchScore.id,
-            MatchScore.questionId,
-            MatchScore.matchId,
-          team_1.name AS team1_name,
-          team_1.logo AS team1_logo,
-            MatchScore.score_team1,
-            team_2.name AS team2_name,
-            team_2.logo AS team2_logo,
-            MatchScore.score_team2
-        FROM MatchScore
-        JOIN 
-          Teams team_1 ON MatchScore.team1_id = team_1.id
-        JOIN 
-          Teams team_2 ON MatchScore.team2_id = team_2.id
-        where MatchScore.matchId in (
-                select currentMatchId from CurrentMatch where id = 0 AND matchAdmin = ${userId}
-        );
-      `;
+      let matchscoresRecord = '';
+
+      if (user[0].role === 'Admin') {
+        matchscoresRecord = `
+          SELECT 
+            MatchScore.id,
+              MatchScore.questionId,
+              MatchScore.matchId,
+            team_1.name AS team1_name,
+            team_1.logo AS team1_logo,
+              MatchScore.score_team1,
+              team_2.name AS team2_name,
+              team_2.logo AS team2_logo,
+              MatchScore.score_team2
+          FROM MatchScore
+          JOIN 
+            Teams team_1 ON MatchScore.team1_id = team_1.id
+          JOIN 
+            Teams team_2 ON MatchScore.team2_id = team_2.id
+          where MatchScore.matchId in (
+                  select currentMatchId from CurrentMatch where id = 0 AND matchAdmin = ${userId}
+          );
+        `;
+
+      } else if (user[0].role === 'Team') {
+        matchscoresRecord = `
+            SELECT 
+                    MatchScore.id,
+                      MatchScore.questionId,
+                      MatchScore.matchId,
+                    team_1.name AS team1_name,
+                    team_1.logo AS team1_logo,
+                      MatchScore.score_team1,
+                      team_2.name AS team2_name,
+                      team_2.logo AS team2_logo,
+                      MatchScore.score_team2
+                  FROM MatchScore
+                  JOIN 
+                    Teams team_1 ON MatchScore.team1_id = team_1.id
+                  JOIN 
+                    Teams team_2 ON MatchScore.team2_id = team_2.id
+                  where MatchScore.matchId in (
+            select currentMatchId from CurrentMatch
+          ) AND (team1_id in (
+            select id from Teams where userId = ${userId}
+          ) OR
+          team2_id in (
+            select id from Teams where userId = ${userId}
+          ));
+        `;
+      }
       const [match] = await db.query(matchscoresRecord);
       
 
@@ -320,5 +387,136 @@ exports.matchScores = async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Internal Server Error' });
+  }
+};
+
+// Player
+exports.getNextMatchPlayer = async (req, res) => {
+  const token = req.headers.token;
+
+
+  try {
+    // Query to get the userId from the Users table using the token
+    const [user] = await db.query(`SELECT id, role FROM Users WHERE token ="${token}"`);
+
+    if (!user || !(user && user.length > 0 && user[0].role === 'Team')) {
+      return res.status(404).json({ message: 'User not found or not authorized' });
+    }
+
+    const userId = user[0].id;
+
+
+    const query = `
+      SELECT 
+        Matches.id,
+          team1_id,
+          team_1.name AS team1_name,
+          team_1.logo AS team1_logo,
+          score_team1,
+          team2_id,
+          team_2.name AS team2_name,
+          team_2.logo AS team2_logo,
+          score_team2,
+          date_time,
+          match_type,
+          question_file,
+          match_status,
+          current_question
+        FROM 
+          Matches
+        JOIN 
+          Teams team_1 ON Matches.team1_id = team_1.id
+        JOIN 
+          Teams team_2 ON Matches.team2_id = team_2.id
+        where Matches.id in (
+        select currentMatchId from CurrentMatch
+      ) AND (team1_id in (
+        select id from Teams where userId = ${userId}
+      ) OR
+      team2_id in (
+        select id from Teams where userId = ${userId}
+      ));
+    `;
+
+    // Query to get the next match for the user's team
+    const [match] = await db.query(query);
+
+    if (!match) {
+      return res.status(404).json({ message: 'No upcoming match found' });
+    }
+
+    res.json({ status: 200, data: match });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+exports.setAnswer = async (req, res) => {
+  const token = req.headers.token;
+  const { answer } = req.body;
+
+
+  try {
+    // Query to get the userId from the Users table using the token
+    const [user] = await db.query(`SELECT id, role FROM Users WHERE token ="${token}"`);
+
+    if (!user || !(user && user.length > 0 && user[0].role === 'Team')) {
+      return res.status(404).json({ message: 'User not found or not authorized' });
+    }
+
+    const userId = user[0].id;
+
+
+    const query = `
+      SELECT 
+        Matches.id,
+        team1_id,
+        score_team1,
+        team2_id,
+        score_team2,
+        current_question
+      FROM 
+        Matches
+      JOIN 
+        Teams team_1 ON Matches.team1_id = team_1.id
+      JOIN 
+        Teams team_2 ON Matches.team2_id = team_2.id
+      where Matches.id in (
+      select currentMatchId from CurrentMatch
+      ) AND (team1_id in (
+      select id from Teams where userId = ${userId}
+      ) OR
+      team2_id in (
+      select id from Teams where userId = ${userId}
+      ));
+    `;
+
+    // Query to get the next match for the user's team
+    const [match] = await db.query(query);
+    const currentquestion = match[0].current_question;
+    const matchId = match[0].id;
+
+    const matchquestionquery = `
+      select * from MatchScore where matchId = ${matchId} AND questionId = ${currentquestion}
+    `;
+
+    const [questionRecord] = await db.query(matchquestionquery);
+    const team1_id = questionRecord[0].team1_id;
+    const team2_id = questionRecord[0].team2_id;
+
+    const [team_record] = await db.query(`select * from Teams where userId = ${userId}`);
+
+    if (team_record[0].id === team1_id) {
+      await db.query(`UPDATE MatchScore SET score_team1 = ${answer ? 1 : 0} where matchId = ${matchId} AND questionId = ${currentquestion}`);
+    } else if (team_record[0].id === team2_id) {
+      await db.query(`UPDATE MatchScore SET score_team2 = ${answer ? 1 : 0} where matchId = ${matchId} AND questionId = ${currentquestion}`);
+    }
+
+  
+    res.json({ status: 200, data: 'Answered' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error' });
   }
 };
