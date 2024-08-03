@@ -88,8 +88,8 @@ exports.startMatch = async (req, res) => {
         const questionId = 0;
         const team1_id = match[0].team1_id;
         const team2_id = match[0].team2_id;
-        const score_team1 = match[0].score_team1;
-        const score_team2 = match[0].score_team2;
+        const score_team1 = 0;
+        const score_team2 = 0;
 
         // Change Match Status to 1
         const startmatchquery = `
@@ -231,8 +231,8 @@ exports.nextquestion = async (req, res) => {
       const nextQuestionId = match[0].current_question + 1;
       const team1_id = match[0].team1_id;
       const team2_id = match[0].team2_id;
-      const score_team1 = match[0].score_team1;
-      const score_team2 = match[0].score_team2;
+      const score_team1 = 0;
+      const score_team2 = 0;
       // Update Question Index
       await db.query('UPDATE Matches SET current_question = current_question + 1, canAnswer = 1 WHERE id = ?', [matchId]);
       
