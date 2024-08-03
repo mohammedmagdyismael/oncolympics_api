@@ -275,11 +275,18 @@ exports.stopAnswer = async (req, res) => {
         if (user.length === 0 || user[0].role !== 'Admin') {
           return res.status(403).json({ error: 'User is not authorized to perform this action' });
         }
-
+        
         const userId = user[0].id;
-      
-      // Update Question Index
-      await db.query(`UPDATE Matches SET canAnswer = 0 WHERE id in (select currentMatchId from CurrentMatch where id = 0 AND matchAdmin = ${userId})`);
+        const query = `
+          UPDATE Matches
+          SET canAnswer = 0
+          WHERE id in (select currentMatchId from CurrentMatch where id = 0 AND matchAdmin = ${userId});
+        `;
+        console.log('userId', query)
+
+        // Update Question Index
+        await db.query(query);
+        res.status(200).json({ message: 'Stoped' });
 
     } catch (error) {
       console.error(error);
