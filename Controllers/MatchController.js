@@ -422,6 +422,7 @@ exports.getNextMatchPlayer = async (req, res) => {
           question_file,
           match_status,
           current_question
+          canAnswer
         FROM 
           Matches
         JOIN 
