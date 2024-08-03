@@ -282,7 +282,6 @@ exports.stopAnswer = async (req, res) => {
           SET canAnswer = 0
           WHERE id in (select currentMatchId from CurrentMatch where id = 0 AND matchAdmin = ${userId});
         `;
-        console.log('userId', query)
 
         // Update Question Index
         await db.query(query);
