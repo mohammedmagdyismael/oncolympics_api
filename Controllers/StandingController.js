@@ -11,7 +11,8 @@ exports.getAllMatches = async (req, res) => {
           m.score_team1, 
           m.score_team2,
           m.match_type,
-          m.date_time
+          m.date_time,
+          m.match_status
         FROM Matches m
         JOIN Teams t1 ON m.team1_id = t1.id
         JOIN Teams t2 ON m.team2_id = t2.id
