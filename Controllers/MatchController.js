@@ -278,21 +278,8 @@ exports.stopAnswer = async (req, res) => {
 
         const userId = user[0].id;
       
-        // Get match record
-        const matchRecord = `
-          SELECT 
-            *
-          FROM 
-              Matches
-          where Matches.id in (
-                  select currentMatchId from CurrentMatch where id = 0 AND matchAdmin = ${userId}
-          );
-        `;
-      const [match] = await db.query(matchRecord);
-      const matchId = match[0].id;
-
       // Update Question Index
-      await db.query('UPDATE Matches SET canAnswer = 0 WHERE id = ?', [matchId]);
+      await db.query(`UPDATE Matches SET canAnswer = 0 WHERE id in (select currentMatchId from CurrentMatch where id = 0 AND matchAdmin = ${userId})`);
 
     } catch (error) {
       console.error(error);
