@@ -35,3 +35,38 @@ exports.login = async (req, res) => {
         return res.status(500).json({ message: e });
     }
 };
+
+
+exports.userInfo = async (req, res) => {
+    const token = req.headers.token;
+    const [user] = await db.query('SELECT * FROM Users WHERE token = ?', [token]);
+    if (user.length === 0) {
+      return res.status(403).json({ error: 'User is not authorized to perform this action' });
+    }
+
+    try {
+        const payload = {
+            isAdmin: false,
+            name: '',
+            logo: '',
+        }
+        if (user[0].role === 'Admin') {
+            payload.name = 'Admin';
+            payload.isAdmin = true;
+            res.json({ status: 200, data: payload });
+        }
+        else if (user[0].role === 'Team') {
+            const userId = user[0].id;
+            const query = `
+                select name, logo from Teams where userId = ${userId};
+            `;
+            const [userInfo] = await db.query(query);
+            payload.logo = userInfo?.[0].logo;
+            payload.name = userInfo?.[0].name;
+            res.json({ status: 200, data: payload });
+        }
+
+    } catch (e) {
+        return res.status(500).json({ message: e });
+    }
+};

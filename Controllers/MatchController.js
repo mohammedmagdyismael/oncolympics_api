@@ -1,6 +1,7 @@
 // controllers/matchController.js
 
 const db = require('../db'); // Assuming you have a database module for handling DB operations
+const groupController = require('./GroupController');
 
 // Moderator
 exports.getNextMatchModerator = async (req, res) => {
@@ -154,8 +155,6 @@ const aggregateScores = async (matchId) => {
   await db.query(aggregationValuesquery);
 };
 
-const aggregateGroups = async () => {};
-
 exports.endMatch = async (req, res) => {
   const token = req.headers.token;
 
@@ -188,9 +187,9 @@ exports.endMatch = async (req, res) => {
       `;
     
       await db.query(query);
-
       try {
         await aggregateScores(matchId);
+        await groupController.groupsAggregator();
       } catch (e) {
         console.log(e);
       }
@@ -252,6 +251,7 @@ exports.nextquestion = async (req, res) => {
         
         try {
           await aggregateScores(matchId);
+          await groupController.groupsAggregator();
         } catch (e) {
           console.log(e);
         }
