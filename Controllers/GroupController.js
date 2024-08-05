@@ -15,11 +15,11 @@ exports.getGroups = async (req, res) => {
     
     // Categorize teams by group
     const groupedTeams = rows.reduce((acc, row) => {
-      const { groupName, teamName, W, D, L, Pts } = row;
+      const { groupName, teamName, W, D, L, Pts, logo } = row;
       if (!acc[groupName]) {
         acc[groupName] = [];
       }
-      acc[groupName].push({ teamName, W, D, L, Pts });
+      acc[groupName].push({ teamName, W, D, L, Pts, logo });
       return acc;
     }, {});
 
