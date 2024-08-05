@@ -5,7 +5,7 @@ exports.getGroups = async (req, res) => {
   try {
     // Query to get groups and teams ordered by Pts
     const query = `
-      SELECT Groups.name as groupName, Teams.name as teamName, Teams.W, Teams.D, Teams.L, Teams.Pts
+      SELECT Groups.name as groupName, Teams.logo as logo, Teams.name as teamName, Teams.W, Teams.D, Teams.L, Teams.Pts
         FROM Teams
         JOIN Groups ON Teams.group_Id = Groups.id
         ORDER BY Groups.name, Teams.Pts DESC
