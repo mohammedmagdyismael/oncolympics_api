@@ -248,13 +248,6 @@ exports.nextquestion = async (req, res) => {
         `;
 
         await db.query(insertquestionrecordquery);
-        
-        try {
-          await aggregateScores(matchId);
-          await groupController.groupsAggregator();
-        } catch (e) {
-          console.log(e);
-        }
 
         res.status(200).json({ message: 'Current question index incremented successfully' });
       } else {
@@ -277,6 +270,21 @@ exports.stopAnswer = async (req, res) => {
         }
         
         const userId = user[0].id;
+
+        // Get match record
+        const matchRecord = `
+          SELECT 
+            *
+          FROM 
+              Matches
+          where Matches.id in (
+                  select currentMatchId from CurrentMatch where id = 0 AND matchAdmin = ${userId}
+          );
+        `;
+        const [match] = await db.query(matchRecord);
+        const matchId = match[0].id;
+
+
         const query = `
           UPDATE Matches
           SET canAnswer = 0
@@ -285,6 +293,14 @@ exports.stopAnswer = async (req, res) => {
 
         // Update Question Index
         await db.query(query);
+        
+        try {
+          await aggregateScores(matchId);
+          await groupController.groupsAggregator();
+        } catch (e) {
+          console.log(e);
+        }
+
         res.status(200).json({ message: 'Stoped' });
 
     } catch (error) {
@@ -382,6 +398,148 @@ exports.matchScores = async (req, res) => {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 };
+
+exports.resetMatch = async (req, res) => {
+  const token = req.headers.token;
+
+  try {
+    // Verify user is Admin
+    const [user] = await db.query('SELECT * FROM Users WHERE token = ?', [token]);
+    if (user.length === 0 || user[0].role !== 'Admin') {
+      return res.status(403).json({ error: 'User is not authorized to perform this action' });
+    }
+
+    const userId = user[0].id;
+    try {
+      // Get match record
+      const matchRecord = `
+        SELECT 
+          *
+        FROM 
+            Matches
+        where Matches.id in (
+                select currentMatchId from CurrentMatch where id = 0 AND matchAdmin = ${userId}
+        );
+      `;
+      const [match] = await db.query(matchRecord);
+      const matchId = match[0].id;
+
+      const resetquery = `
+        UPDATE Matches
+        SET score_team1 = 0, score_team2 = 0, match_status = 0, current_question = 0, canAnswer = 1
+        where id = ${matchId};
+        DELETE FROM MatchScore where matchId = ${matchId};
+      `;
+      await db.query(resetquery);
+      await groupController.groupsAggregator()
+
+      res.status(200).json({ message: `Match Reset!` });
+    } catch (err) {
+      res.status(400).json({ error: 'Invalid status transition' });
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+};
+
+exports.rewardTeam = async (req, res) => {
+  const token = req.headers.token;
+  const { teamId } = req.body;
+  try {
+    // Verify user is Admin
+    const [user] = await db.query('SELECT * FROM Users WHERE token = ?', [token]);
+    if (user.length === 0 || user[0].role !== 'Admin') {
+      return res.status(403).json({ error: 'User is not authorized to perform this action' });
+    }
+
+    const userId = user[0].id;
+  
+    // Get match record
+    const matchRecord = `
+      SELECT 
+        *
+      FROM 
+          Matches
+      where Matches.id in (
+              select currentMatchId from CurrentMatch where id = 0 AND matchAdmin = ${userId}
+      );
+    `;
+    const [match] = await db.query(matchRecord);
+    const matchId = match[0].id;
+    const currentQuestion = match[0].current_question;
+
+    const questionrecordquery = `
+      select * from MatchScore where matchId = ${matchId} and questionId = ${currentQuestion};
+    `;
+    const [question] = await db.query(questionrecordquery);
+    const team1Id = question[0]?.team1_id;
+    const team2Id = question[0]?.team2_id;
+    let updatequery = '';
+
+    if (teamId === team1Id) {
+      updatequery = `UPDATE MatchScore SET score_team1 = score_team1 + 1 where matchId = ${matchId} and questionId = ${currentQuestion};`
+    }
+    if (teamId === team2Id) {
+      updatequery = `UPDATE MatchScore SET score_team2 = score_team2 + 1 where matchId = ${matchId} and questionId = ${currentQuestion};`
+    }
+    await db.query(updatequery);
+    res.status(200).json({ message: `Team Rewarded!` });
+
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: e });
+  }
+}
+
+exports.penalTeam = async (req, res) => {
+  const token = req.headers.token;
+  const { teamId } = req.body;
+  try {
+    // Verify user is Admin
+    const [user] = await db.query('SELECT * FROM Users WHERE token = ?', [token]);
+    if (user.length === 0 || user[0].role !== 'Admin') {
+      return res.status(403).json({ error: 'User is not authorized to perform this action' });
+    }
+
+    const userId = user[0].id;
+  
+    // Get match record
+    const matchRecord = `
+      SELECT 
+        *
+      FROM 
+          Matches
+      where Matches.id in (
+              select currentMatchId from CurrentMatch where id = 0 AND matchAdmin = ${userId}
+      );
+    `;
+    const [match] = await db.query(matchRecord);
+    const matchId = match[0].id;
+    const currentQuestion = match[0].current_question;
+
+    const questionrecordquery = `
+      select * from MatchScore where matchId = ${matchId} and questionId = ${currentQuestion};
+    `;
+    const [question] = await db.query(questionrecordquery);
+    const team1Id = question[0]?.team1_id;
+    const team2Id = question[0]?.team2_id;
+    let updatequery = '';
+
+    if (teamId === team1Id) {
+      updatequery = `UPDATE MatchScore SET score_team1 = score_team1 - 1 where matchId = ${matchId} and questionId = ${currentQuestion};`
+    }
+    if (teamId === team2Id) {
+      updatequery = `UPDATE MatchScore SET score_team2 = score_team2 - 1 where matchId = ${matchId} and questionId = ${currentQuestion};`
+    }
+    await db.query(updatequery);
+    res.status(200).json({ message: `Team Penalted!` });
+
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: e });
+  }
+}
 
 // Player
 exports.getNextMatchPlayer = async (req, res) => {

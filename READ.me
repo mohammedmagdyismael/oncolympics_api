@@ -1,0 +1,18 @@
+# Instal Prisma in ready existing project
+
+npm install prisma --save-dev
+npx prisma init
+
+# Generate Schema from ready existing DB tables
+
+npx prisma introspect
+
+# Install Prisma client
+
+npm install @prisma/client
+npx prisma generate
+
+# Create First Migration To map your data model to the database schema, you need to use the prisma migrate CLI commands:
+
+prisma migrate dev --name init
+

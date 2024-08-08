@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+require('dotenv').config();
 
 const healthCheck = require('./Routes/HealthCheck');
 const userRoutes = require('./Routes/UserRoutes');

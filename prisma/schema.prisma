@@ -1,0 +1,82 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model CurrentMatch {
+  id             Int  @id
+  currentMatchId Int?
+  matchAdmin     Int?
+}
+
+model Groups {
+  id    Int     @id @default(autoincrement())
+  name  String  @unique(map: "name") @db.VarChar(255)
+  Teams Teams[]
+}
+
+model MatchScore {
+  id          Int  @id @default(autoincrement())
+  matchId     Int?
+  questionId  Int?
+  team1_id    Int?
+  team2_id    Int?
+  score_team1 Int?
+  score_team2 Int?
+}
+
+model Matches {
+  id                            Int      @id @default(autoincrement())
+  team1_id                      Int
+  team2_id                      Int
+  score_team1                   Int?
+  score_team2                   Int?
+  match_type                    String   @db.VarChar(255)
+  date_time                     DateTime @db.DateTime(0)
+  question_file                 String?  @db.VarChar(255)
+  match_status                  Int?
+  current_question              Int?
+  canAnswer                     Int?     @default(1)
+  Teams_Matches_team1_idToTeams Teams    @relation("Matches_team1_idToTeams", fields: [team1_id], references: [id], onUpdate: Restrict, map: "Matches_ibfk_1")
+  Teams_Matches_team2_idToTeams Teams    @relation("Matches_team2_idToTeams", fields: [team2_id], references: [id], onUpdate: Restrict, map: "Matches_ibfk_2")
+
+  @@index([team1_id], map: "team1_id")
+  @@index([team2_id], map: "team2_id")
+}
+
+model Teams {
+  id                              Int       @id @default(autoincrement())
+  name                            String    @unique(map: "name") @db.VarChar(255)
+  group_id                        Int
+  W                               Int?      @default(0)
+  D                               Int?      @default(0)
+  L                               Int?      @default(0)
+  Pts                             Int?      @default(0)
+  userId                          Int?
+  logo                            String?   @db.VarChar(255)
+  Matches_Matches_team1_idToTeams Matches[] @relation("Matches_team1_idToTeams")
+  Matches_Matches_team2_idToTeams Matches[] @relation("Matches_team2_idToTeams")
+  Users                           Users?    @relation(fields: [userId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "FK_User_Teams")
+  Groups                          Groups    @relation(fields: [group_id], references: [id], onUpdate: Restrict, map: "Teams_ibfk_1")
+
+  @@index([userId], map: "FK_User_Teams")
+  @@index([group_id], map: "group_id")
+}
+
+model Users {
+  id       Int        @id @default(autoincrement())
+  username String     @unique(map: "username") @db.VarChar(255)
+  password String     @db.VarChar(255)
+  token    String     @unique(map: "token") @db.VarChar(255)
+  role     Users_role
+  Teams    Teams[]
+}
+
+enum Users_role {
+  Admin
+  Team
+}
