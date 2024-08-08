@@ -493,6 +493,7 @@ exports.rewardTeam = async (req, res) => {
       updatequery = `UPDATE MatchScore SET score_team2 = score_team2 + 1 where matchId = ${matchId} and questionId = ${currentQuestion};`
     }
     await db.query(updatequery);
+    await aggregateScores(matchId);
     res.status(200).json({ message: `Team Rewarded!` });
 
   } catch (e) {
@@ -542,6 +543,7 @@ exports.penalTeam = async (req, res) => {
       updatequery = `UPDATE MatchScore SET score_team2 = score_team2 - 1 where matchId = ${matchId} and questionId = ${currentQuestion};`
     }
     await db.query(updatequery);
+    await aggregateScores(matchId);
     res.status(200).json({ message: `Team Penalted!` });
 
   } catch (e) {
