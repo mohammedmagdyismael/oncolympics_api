@@ -426,18 +426,24 @@ exports.resetMatch = async (req, res) => {
       const [match] = await db.query(matchRecord);
       const matchId = match[0].id;
 
-      const resetquery = `
+      const resetqueryA = `
         UPDATE Matches
         SET score_team1 = 0, score_team2 = 0, match_status = 0, current_question = 0, canAnswer = 1
         where id = ${matchId};
+      `;
+      await db.query(resetqueryA);
+
+      const resetqueryB = `
         DELETE FROM MatchScore where matchId = ${matchId};
       `;
-      await db.query(resetquery);
+      await db.query(resetqueryB);
+
+
       await groupController.groupsAggregator()
 
       res.status(200).json({ message: `Match Reset!` });
     } catch (err) {
-      res.status(400).json({ error: 'Invalid status transition' });
+      res.status(400).json({ error: err });
     }
   } catch (error) {
     console.error(error);
