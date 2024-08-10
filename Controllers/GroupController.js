@@ -48,6 +48,29 @@ exports.groupsAggregator = async () => {
 
     const response = {};
     if (groupMatches?.length) {
+
+      // Create Empty Template
+      groupMatches.forEach(match => {
+        if (!response[match.team1_id]) {
+          response[match.team1_id] = {
+            w: 0,
+            l: 0,
+            d: 0,
+            pts: 0
+          };
+        }
+      
+        if (!response[match.team2_id]) {
+          response[match.team2_id] = {
+            w: 0,
+            l: 0,
+            d: 0,
+            pts: 0
+          };
+        }
+      });
+
+      // Aggregate teams points
       groupMatches.forEach(match => {
         if (match.match_status !== 0) {
           if (!response[match.team1_id]) {
@@ -83,13 +106,16 @@ exports.groupsAggregator = async () => {
             response[match.team2_id].pts++;
           }
         }
-      })
+      });
     }
 
-    let aggregationQuery = ``
     Object.keys(response)?.forEach(async k => {
-      aggregationQuery = `UPDATE Teams SET W=${response[k].w}, D=${response[k].d}, L=${response[k].l}, Pts=${response[k].pts} WHERE id = ${k};`;
-      await db.query(aggregationQuery);
+      try {
+        const aggregationQuery = `UPDATE Teams SET W=${response[k].w}, D=${response[k].d}, L=${response[k].l}, Pts=${response[k].pts} WHERE id = ${k};`;
+        await db.query(aggregationQuery);
+      } catch (e) {
+        console.log(e)
+      }
     });
   } catch (e) {
     console.log(e);

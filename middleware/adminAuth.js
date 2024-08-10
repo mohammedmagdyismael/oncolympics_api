@@ -1,18 +1,25 @@
 
 const db = require('../db'); 
+const prisma = require('../db_prisma');
 
 module.exports = async (req ,res, next)=>{
     try {
         const token = req.headers.token;
-        const [user] = await db.query('SELECT * FROM Users WHERE token = ?', [token]);
-        if (user.length === 0 || user[0].role !== 'Admin') {
-        return res.status(401).json({ error: 'User is not authorized to perform this action' });
-        }
+        const user = await prisma.users.findFirst({
+            where: {
+                token: {
+                    equals: token,
+                },
+            },
+        });
 
+        if (!user || user?.role !== 'Admin') {
+            return res.status(401).json({ error: 'User is not authorized to perform this action' });
+        }
+        req.data = user;
         next();
     }
     catch(error){
         res.status(401).json({msg:'Token denied'})
     }
-
 }

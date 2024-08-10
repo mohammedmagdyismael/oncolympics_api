@@ -51,6 +51,7 @@ model Matches {
 model Teams {
   id                              Int       @id @default(autoincrement())
   name                            String    @unique(map: "name") @db.VarChar(255)
+  abbrev                          String?   @db.VarChar(45)
   group_id                        Int
   W                               Int?      @default(0)
   D                               Int?      @default(0)

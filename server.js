@@ -14,11 +14,9 @@ const PORT = process.env.PORT || 5000;
 app.use(express.json());
 app.use(cors());
 
-app.get("/", (req, res) => res.send("Oncolymbics"));
-
 /** Routes */
 // Health Check
-app.use('/api', healthCheck);
+app.use('/', healthCheck);
 // Use the user routes
 app.use('/api/users', userRoutes);
 // Use the groups routes

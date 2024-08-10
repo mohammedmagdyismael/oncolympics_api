@@ -1,11 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const userController = require('../Controllers/UserControllers');
-
-// Todo: use auth middleware
+const userExist = require('../middleware/userExist');
 
 // Define the login route
 router.post('/login', userController.login);
-router.get('/userInfo', userController.userInfo);
+router.get('/userInfo', userExist, userController.userInfo);
 
 module.exports = router;
