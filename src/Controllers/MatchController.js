@@ -71,10 +71,10 @@ exports.getCurrentQuestionAnswers = async (req, res) => {
     const questionDetails = await prisma.matchScore.findFirst({
       where: {
         matchId: {
-          equals: matchId,
+          equals: Number(matchId),
         },
         questionId: {
-          equals: questionId,
+          equals: Number(questionId),
         },
       }
     });
