@@ -4,11 +4,11 @@ const swaggerJsDoc = require('swagger-jsdoc');
 const swaggerUi = require('swagger-ui-express');
 require('dotenv').config();
 
-const healthCheck = require('./Routes/HealthCheck');
-const userRoutes = require('./Routes/UserRoutes');
-const groupsRoutes = require('./Routes/GroupRoutes');
-const standingsRoutes = require('./Routes/StandingRoutes');
-const matchRoutes = require('./Routes/MatchRoutes');
+const healthCheck = require('./src/Routes/HealthCheck');
+const userRoutes = require('./src/Routes/UserRoutes');
+const groupsRoutes = require('./src/Routes/GroupRoutes');
+const standingsRoutes = require('./src/Routes/StandingRoutes');
+const matchRoutes = require('./src/Routes/MatchRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
