@@ -73,24 +73,6 @@ exports.groupsAggregator = async () => {
       // Aggregate teams points
       groupMatches.forEach(match => {
         if (match.match_status !== 0) {
-          if (!response[match.team1_id]) {
-            response[match.team1_id] = {
-              w: 0,
-              l: 0,
-              d: 0,
-              pts: 0
-            };
-          }
-        
-          if (!response[match.team2_id]) {
-            response[match.team2_id] = {
-              w: 0,
-              l: 0,
-              d: 0,
-              pts: 0
-            };
-          }
-
           if (match.score_team1 > match.score_team2) {
             response[match.team1_id].w++;
             response[match.team1_id].pts += 3;

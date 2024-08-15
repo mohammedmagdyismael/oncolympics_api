@@ -1,5 +1,7 @@
 const express = require('express');
 const cors = require('cors');
+const swaggerJsDoc = require('swagger-jsdoc');
+const swaggerUi = require('swagger-ui-express');
 require('dotenv').config();
 
 const healthCheck = require('./Routes/HealthCheck');
@@ -14,6 +16,25 @@ const PORT = process.env.PORT || 5000;
 app.use(express.json());
 app.use(cors());
 
+/** Swagger */
+const swaggerOptions = {
+  swaggerDefinition:{
+      info:{
+          title: 'Oncolympics APIs',
+          description: 'Oncolympics APIs',
+          contact: {
+              name: 'm.magdy.isl@gmail.com'
+          },
+          servers:[`https://localhost:${PORT}`]
+      }
+  },
+  apis: [
+      'server.js',
+      'Routes/UserRoutes.js'
+  ]
+}
+const swaggerDocs = swaggerJsDoc(swaggerOptions)
+
 /** Routes */
 // Health Check
 app.use('/', healthCheck);
@@ -25,6 +46,9 @@ app.use('/api/groups', groupsRoutes);
 app.use('/api/standings', standingsRoutes);
 // Use the match routes
 app.use('/api/match', matchRoutes);
+
+// Swagger Doc
+app.use('/api/docs',swaggerUi.serve,swaggerUi.setup(swaggerDocs))
 
 // Start the server
 const server = app.listen(PORT, () => {

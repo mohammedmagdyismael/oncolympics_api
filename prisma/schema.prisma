@@ -20,13 +20,15 @@ model Groups {
 }
 
 model MatchScore {
-  id          Int  @id @default(autoincrement())
-  matchId     Int?
-  questionId  Int?
-  team1_id    Int?
-  team2_id    Int?
-  score_team1 Int?
-  score_team2 Int?
+  id            Int  @id @default(autoincrement())
+  matchId       Int?
+  questionId    Int?
+  team1_id      Int?
+  team2_id      Int?
+  score_team1   Int?
+  score_team2   Int?
+  team1answerid Int?
+  team2answerid Int?
 }
 
 model Matches {

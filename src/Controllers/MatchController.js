@@ -1,6 +1,7 @@
 // controllers/matchController.js
 
 const db = require('../db'); // Assuming you have a database module for handling DB operations
+const prisma = require('../db_prisma');
 const groupController = require('./GroupController');
 
 // Moderator
@@ -57,6 +58,28 @@ exports.getNextMatchModerator = async (req, res) => {
     }
 
     res.json({ status: 200, data: match });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+exports.getCurrentQuestionAnswers = async (req, res) => {
+  const { matchId, questionId } = req.query;
+  try {
+    // Query to get the userId from the Users table using the token
+    const questionDetails = await prisma.matchScore.findFirst({
+      where: {
+        matchId: {
+          equals: matchId,
+        },
+        questionId: {
+          equals: questionId,
+        },
+      }
+    });
+
+    res.json({ status: 200, data: { ...questionDetails } });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Server error' });
@@ -619,7 +642,7 @@ exports.getNextMatchPlayer = async (req, res) => {
 
 exports.setAnswer = async (req, res) => {
   const token = req.headers.token;
-  const { answer } = req.body;
+  const { answer, answerId } = req.body;
 
 
   try {
@@ -673,9 +696,9 @@ exports.setAnswer = async (req, res) => {
     const [team_record] = await db.query(`select * from Teams where userId = ${userId}`);
 
     if (team_record[0].id === team1_id) {
-      await db.query(`UPDATE MatchScore SET score_team1 = ${answer ? 1 : 0} where matchId = ${matchId} AND questionId = ${currentquestion}`);
+      await db.query(`UPDATE MatchScore SET score_team1 = ${answer ? 1 : 0}, team1answerid = ${answerId} where matchId = ${matchId} AND questionId = ${currentquestion}`);
     } else if (team_record[0].id === team2_id) {
-      await db.query(`UPDATE MatchScore SET score_team2 = ${answer ? 1 : 0} where matchId = ${matchId} AND questionId = ${currentquestion}`);
+      await db.query(`UPDATE MatchScore SET score_team2 = ${answer ? 1 : 0}, team1answerid = ${answerId} where matchId = ${matchId} AND questionId = ${currentquestion}`);
     }
 
   

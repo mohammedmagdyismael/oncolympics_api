@@ -14,6 +14,7 @@ router.get('/stopanswer', adminAuth, matchController.stopAnswer)
 router.get('/resetmatch', adminAuth, matchController.resetMatch)
 router.post('/reward', adminAuth, matchController.rewardTeam)
 router.post('/penalty', adminAuth, matchController.penalTeam)
+router.get('/questionanswers', adminAuth, matchController.getCurrentQuestionAnswers)
 
 
 // Team Player
