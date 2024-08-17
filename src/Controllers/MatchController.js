@@ -698,7 +698,7 @@ exports.setAnswer = async (req, res) => {
     if (team_record[0].id === team1_id) {
       await db.query(`UPDATE MatchScore SET score_team1 = ${answer ? 1 : 0}, team1answerid = ${answerId} where matchId = ${matchId} AND questionId = ${currentquestion}`);
     } else if (team_record[0].id === team2_id) {
-      await db.query(`UPDATE MatchScore SET score_team2 = ${answer ? 1 : 0}, team1answerid = ${answerId} where matchId = ${matchId} AND questionId = ${currentquestion}`);
+      await db.query(`UPDATE MatchScore SET score_team2 = ${answer ? 1 : 0}, team2answerid = ${answerId} where matchId = ${matchId} AND questionId = ${currentquestion}`);
     }
 
   
