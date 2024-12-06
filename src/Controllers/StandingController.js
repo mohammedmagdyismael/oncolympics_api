@@ -6,9 +6,11 @@ exports.getAllMatches = async (req, res) => {
         SELECT 
           m.id as match_id,
           t1.name AS team1_name, 
+          t1.abbrev AS team1_abbrev, 
           t1.id AS team1_id, 
           t1.logo AS team1_logo, 
           t2.name AS team2_name, 
+          t2.abbrev AS team2_abbrev, 
           t2.id AS team2_id,
           t2.logo AS team2_logo,
           m.score_team1, 
