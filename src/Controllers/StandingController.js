@@ -19,6 +19,7 @@ exports.getAllMatches = async (req, res) => {
         FROM Matches m
         JOIN Teams t1 ON m.team1_id = t1.id
         JOIN Teams t2 ON m.team2_id = t2.id
+        WHERE m.match_type = 'First_round'
         ORDER BY m.date_time
       `);
     res.json({
@@ -37,14 +38,16 @@ exports.getAllMatches = async (req, res) => {
     const matchscoresRecord = `
         SELECT 
           MatchScore.id,
-            MatchScore.questionId,
-            MatchScore.matchId,
+          MatchScore.questionId,
+          MatchScore.matchId,
           team_1.name AS team1_name,
+          team_1.abbrev AS team1_abbrev,
           team_1.logo AS team1_logo,
-            MatchScore.score_team1,
-            team_2.name AS team2_name,
-            team_2.logo AS team2_logo,
-            MatchScore.score_team2
+          MatchScore.score_team1,
+          team_2.name AS team2_name,
+          team_2.abbrev AS team2_abbrev,
+          team_2.logo AS team2_logo,
+          MatchScore.score_team2
         FROM MatchScore
         JOIN 
           Teams team_1 ON MatchScore.team1_id = team_1.id
