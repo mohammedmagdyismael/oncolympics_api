@@ -638,12 +638,14 @@ exports.getNextMatchPlayer = async (req, res) => {
       const currentquestionrecordquery = `SELECT * FROM MatchScore where matchId = ${matchId} And questionId = ${currentQuestion} And team1_id = ${userId} OR team2_id = ${userId};`;
       const [currentquestionrecord] = await db.query(currentquestionrecordquery);
 
-      let myteamAnswerID;
+
+      console.log(currentquestionrecord);
+      /* let myteamAnswerID;
       if (currentquestionrecord.team1_id === userId) {
         myteamAnswerID = currentquestionrecord[0].team1answerid;
       } else {
         myteamAnswerID = currentquestionrecord[0].team2answerid;
-      }
+      } */
 
       response = [{ ...match[0], myteamAnswerID: myteamAnswerID, }];
 
