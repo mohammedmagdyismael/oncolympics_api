@@ -639,13 +639,13 @@ exports.getNextMatchPlayer = async (req, res) => {
       const [currentquestionrecord] = await db.query(currentquestionrecordquery);
 
       let myteamAnswerID;
-      if (currentquestionrecord.team1Id === userId) {
-        myteamAnswerID = currentquestionrecord[0].team1_answer_id;
+      if (currentquestionrecord.team1_id === userId) {
+        myteamAnswerID = currentquestionrecord[0].team1answerid;
       } else {
-        myteamAnswerID = currentquestionrecord[0].team2_answer_id;
+        myteamAnswerID = currentquestionrecord[0].team2answerid;
       }
 
-      response = [{ ...match[0], myteamAnswerID, }];
+      response = [{ ...currentquestionrecord[0], ...match[0] }];
 
     }
 
