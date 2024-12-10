@@ -645,7 +645,7 @@ exports.getNextMatchPlayer = async (req, res) => {
         myteamAnswerID = currentquestionrecord[0].team2_answer_id;
       }
 
-      response = [{ ...currentquestionrecord[0], myteamAnswerID: myteamAnswerID }];
+      response = [{ ...match[0], myteamAnswerID, }];
 
     }
 
