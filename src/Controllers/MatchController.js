@@ -628,12 +628,21 @@ exports.getNextMatchPlayer = async (req, res) => {
 
     // Query to get the next match for the user's team
     const [match] = await db.query(query);
+    let response = [];
 
     if (!match) {
       return res.status(404).json({ message: 'No upcoming match found' });
+    } else {
+      const currentQuestion = match[0].current_question;
+      const matchId = match[0].id;
+      const currentquestionrecordquery = `SELECT * FROM MatchScore where matchId = ${matchId} And questionId = ${currentQuestion}`;
+      const [currentquestionrecord] = await db.query(currentquestionrecordquery);
+
+      response = [{ ...currentquestionrecord[0], ...match[0] }];
+
     }
 
-    res.json({ status: 200, data: match });
+    res.json({ status: 200, data: response });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Server error' });
