@@ -642,8 +642,6 @@ exports.getNextMatchPlayer = async (req, res) => {
         },
       });
 
-      console.log('teamInfo', teamInfo)
-
       const currentquestionrecordquery = `SELECT * FROM MatchScore where matchId = ${matchId} And questionId = ${currentQuestion} And (team1_id in (select id from Teams where userId = ${userId})  OR team2_id in (select id from Teams where userId = ${userId}));`;
       
       console.log(currentquestionrecordquery)
@@ -651,7 +649,7 @@ exports.getNextMatchPlayer = async (req, res) => {
       const [currentquestionrecord] = await db.query(currentquestionrecordquery);
 
       let myteamAnswerID;
-      if (currentquestionrecord.team1_id === userId) {
+      if (currentquestionrecord.team1_id === teamInfo?.id) {
         myteamAnswerID = currentquestionrecord[0].team1answerid;
       } else {
         myteamAnswerID = currentquestionrecord[0].team2answerid;
