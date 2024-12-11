@@ -646,6 +646,8 @@ exports.getNextMatchPlayer = async (req, res) => {
             
       const [currentquestionrecord] = await db.query(currentquestionrecordquery);
 
+      console.log('currentquestionrecord', currentquestionrecord, teamInfo);
+
       let myteamAnswerID;
       if (currentquestionrecord.team1_id === teamInfo?.id) {
         myteamAnswerID = currentquestionrecord[0].team1answerid;
