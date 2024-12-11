@@ -636,6 +636,14 @@ exports.getNextMatchPlayer = async (req, res) => {
       const currentQuestion = match[0].current_question;
       const matchId = match[0].id;
 
+      const teamInfo = await prisma.teams.findFirst({
+        where: {
+          userId: userId,
+        },
+      });
+
+      console.log('teamInfo', teamInfo)
+
       const currentquestionrecordquery = `SELECT * FROM MatchScore where matchId = ${matchId} And questionId = ${currentQuestion} And (team1_id in (select id from Teams where userId = ${userId})  OR team2_id in (select id from Teams where userId = ${userId}));`;
       
       console.log(currentquestionrecordquery)
