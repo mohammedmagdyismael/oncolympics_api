@@ -1,7 +1,22 @@
-const db = require('../db'); // Assuming db is your database connection module
+const db = require('../db');
+const prisma = require('../db_prisma');
+const Constants = require('../utils/Constants');
+
 
 exports.getAllMatches = async (req, res) => {
     try {
+
+      const matchesList = await prisma.matches.findMany({
+        where: {
+          match_type: Constants.STAGES.First_round,
+        },
+        orderBy: {
+          date_time: 'asc',
+        },
+      });
+
+      console.log(matchesList);
+
       const [results] = await db.query(`
         SELECT 
           m.id as match_id,
@@ -21,7 +36,7 @@ exports.getAllMatches = async (req, res) => {
         FROM Matches m
         JOIN Teams t1 ON m.team1_id = t1.id
         JOIN Teams t2 ON m.team2_id = t2.id
-        WHERE m.match_type = 'First_round'
+        WHERE m.match_type = ${Constants.STAGES.First_round}
         ORDER BY m.date_time
       `);
     res.json({

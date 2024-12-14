@@ -1,8 +1,9 @@
 // controllers/matchController.js
 
-const db = require('../db'); // Assuming you have a database module for handling DB operations
+const db = require('../db');
 const prisma = require('../db_prisma');
 const groupController = require('./GroupController');
+const Constants = require('../utils/Constants');
 
 // Moderator
 exports.getNextMatchModerator = async (req, res) => {
@@ -13,7 +14,7 @@ exports.getNextMatchModerator = async (req, res) => {
     // Query to get the userId from the Users table using the token
     const [user] = await db.query(`SELECT id, role FROM Users WHERE token ="${token}"`);
 
-    if (!user || !(user && user.length > 0 && user[0].role === 'Admin')) {
+    if (!user || !(user && user.length > 0 && user[0].role === Constants.ROLES.ADMIN)) {
       return res.status(404).json({ message: 'User not found or not authorized' });
     }
 
@@ -92,7 +93,7 @@ exports.startMatch = async (req, res) => {
     try {
       // Verify user is Admin
       const [user] = await db.query('SELECT * FROM Users WHERE token = ?', [token]);
-      if (user.length === 0 || user[0].role !== 'Admin') {
+      if (user.length === 0 || user[0].role !== Constants.ROLES.ADMIN) {
         return res.status(403).json({ error: 'User is not authorized to perform this action' });
       }
 

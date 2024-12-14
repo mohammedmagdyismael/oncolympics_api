@@ -1,6 +1,7 @@
 
 const db = require('../db'); 
 const prisma = require('../db_prisma');
+const Constants = require('../utils/Constants');
 
 module.exports = async (req ,res, next)=>{
     try {
@@ -13,7 +14,7 @@ module.exports = async (req ,res, next)=>{
             },
         });
 
-        if (!user || user?.role !== 'Admin') {
+        if (!user || user?.role !== Constants.ROLES.ADMIN) {
             return res.status(401).json({ error: 'User is not authorized to perform this action' });
         }
         req.data = user;

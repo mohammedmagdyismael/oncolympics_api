@@ -1,5 +1,6 @@
 const db = require('../db');
 const prisma = require('../db_prisma');
+const Constants = require('../utils/Constants');
 
 // Login function
 exports.login = async (req, res) => {
@@ -46,11 +47,11 @@ exports.userInfo = async (req, res) => {
             name: '',
             logo: '',
         }
-        if (role === 'Admin') {
-            payload.name = 'Admin';
+        if (role === Constants.ROLES.ADMIN) {
+            payload.name = Constants.ROLES.ADMIN;
             payload.isAdmin = true;
         }
-        else if (role === 'Team') {
+        else if (role === Constants.ROLES.TEAM) {
             const teamInfo = await prisma.teams.findFirst({
                 where: {
                     userId: id,

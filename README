@@ -12,11 +12,21 @@ npx prisma introspect
 npm install @prisma/client
 npx prisma generate
 
-# Create First Migration To map your data model to the database schema, you need to use the prisma migrate CLI commands:
+# Create First Migration To map your data model to the database schema, you need to use the prisma migrate CLI commands
 
 npx prisma migrate dev --name init
 
 # Prisma studio
 
 npx prisma studio
+
+Routes => Controller => Core => DAL 
+
+
+Data 
+    Migrations
+    Entities
+    helpers
+    Models
+    Tests 
 

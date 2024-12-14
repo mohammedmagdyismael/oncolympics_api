@@ -1,4 +1,5 @@
 const db = require('../db');
+const Constants = require('../utils/Constants');
 
 // Get groups with teams ordered by points
 exports.getGroups = async (req, res) => {
@@ -42,7 +43,7 @@ exports.groupsAggregator = async () => {
           score_team1,
           score_team2,
           match_status
-      FROM Matches where match_type='First_round';
+      FROM Matches where match_type=${Constants.STAGES.First_round};
     `;
     const [groupMatches] = await db.query(query);
 

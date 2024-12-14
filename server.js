@@ -9,6 +9,7 @@ const userRoutes = require('./src/Routes/UserRoutes');
 const groupsRoutes = require('./src/Routes/GroupRoutes');
 const standingsRoutes = require('./src/Routes/StandingRoutes');
 const matchRoutes = require('./src/Routes/MatchRoutes');
+const knockoutsRoutes = require('./src/Routes/KnockoutRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -36,23 +37,19 @@ const swaggerOptions = {
 const swaggerDocs = swaggerJsDoc(swaggerOptions)
 
 /** Routes */
-// Health Check
 app.use('/', healthCheck);
-// Use the user routes
 app.use('/api/users', userRoutes);
-// Use the groups routes
 app.use('/api/groups', groupsRoutes);
-// Use the standings routes
 app.use('/api/standings', standingsRoutes);
-// Use the match routes
+app.use('/api/knockouts', knockoutsRoutes);
 app.use('/api/match', matchRoutes);
 
 // Swagger Doc
-app.use('/api/docs',swaggerUi.serve,swaggerUi.setup(swaggerDocs))
+app.use('/swagger',swaggerUi.serve,swaggerUi.setup(swaggerDocs))
 
 // Start the server
 const server = app.listen(PORT, () => {
-  console.log(`Server is running on Port: ${PORT}`);
+  console.log(`Server is running on Port: http://localhost:${PORT}/`);
 });
 
 server.keepAliveTimeout = 120 * 1000;
