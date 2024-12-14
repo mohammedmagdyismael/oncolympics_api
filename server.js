@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const swaggerJsDoc = require('swagger-jsdoc');
 const swaggerUi = require('swagger-ui-express');
+const swaggerFile = require('./swagger_output.json');
 require('dotenv').config();
 
 const healthCheck = require('./src/Routes/HealthCheck');
@@ -18,23 +19,26 @@ app.use(express.json());
 app.use(cors());
 
 /** Swagger */
-const swaggerOptions = {
-  swaggerDefinition:{
-      info:{
-          title: 'Oncolympics APIs',
-          description: 'Oncolympics APIs',
-          contact: {
-              name: 'm.magdy.isl@gmail.com'
-          },
-          servers:[`https://localhost:${PORT}`]
-      }
+const swaggerDefinition = {
+  openapi: '3.0.0', // Specify OpenAPI version
+  info: {
+    title: 'oncolympics_api', // API title
+    version: '1.0.0', // API version
+    description: 'Description of your API', // Description
   },
-  apis: [
-      'server.js',
-      'Routes/UserRoutes.js'
-  ]
-}
-const swaggerDocs = swaggerJsDoc(swaggerOptions)
+  servers: [
+    {
+      url: `http://localhost:${PORT}`, // Your API base URL
+      description: 'Local server',
+    },
+  ],
+};
+
+const options = {
+  swaggerDefinition,
+  apis: ['./src/Routes/*.js'],
+};
+const swaggerDocs = swaggerJsDoc(options)
 
 /** Routes */
 app.use('/', healthCheck);
@@ -45,7 +49,7 @@ app.use('/api/knockouts', knockoutsRoutes);
 app.use('/api/match', matchRoutes);
 
 // Swagger Doc
-app.use('/swagger',swaggerUi.serve,swaggerUi.setup(swaggerDocs))
+app.use('/swagger',swaggerUi.serve,swaggerUi.setup(swaggerFile))
 
 // Start the server
 const server = app.listen(PORT, () => {
