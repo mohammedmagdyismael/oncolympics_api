@@ -23,7 +23,7 @@ exports.getAllMatchesA = async (req, res) => {
         FROM Matches m
         JOIN Teams t1 ON m.team1_id = t1.id
         JOIN Teams t2 ON m.team2_id = t2.id
-        WHERE m.match_type = ${Constants.STAGES.Second_round}
+        WHERE m.match_type = '${Constants.STAGES.Second_round}'
         ORDER BY m.date_time
       `);
     res.json({
@@ -56,7 +56,7 @@ exports.getAllMatchesB = async (req, res) => {
         FROM Matches m
         JOIN Teams t1 ON m.team1_id = t1.id
         JOIN Teams t2 ON m.team2_id = t2.id
-        WHERE m.match_type = ${Constants.STAGES.Third_round}
+        WHERE m.match_type = '${Constants.STAGES.Third_round}'
         ORDER BY m.date_time
       `);
     res.json({
@@ -89,7 +89,7 @@ exports.getAllMatchesFinal = async (req, res) => {
       FROM Matches m
       JOIN Teams t1 ON m.team1_id = t1.id
       JOIN Teams t2 ON m.team2_id = t2.id
-      WHERE m.match_type = ${Constants.STAGES.Final_round}
+      WHERE m.match_type = '${Constants.STAGES.Final_round}'
       ORDER BY m.date_time
     `);
   res.json({
