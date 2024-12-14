@@ -674,7 +674,7 @@ exports.setAnswer = async (req, res) => {
     // Query to get the userId from the Users table using the token
     const [user] = await db.query(`SELECT id, role FROM Users WHERE token ="${token}"`);
 
-    if (!user || !(user && user.length > 0 && user[0].role === 'Team')) {
+    if (!user || !(user && user.length > 0 && user[0].role === Constants.ROLES.TEAM)) {
       return res.status(404).json({ message: 'User not found or not authorized' });
     }
 
@@ -729,7 +729,6 @@ exports.setAnswer = async (req, res) => {
   
     res.json({ status: 200, data: 'Answered' });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: error });
   }
 };
