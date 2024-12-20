@@ -6,10 +6,40 @@ exports.getGroups = async (req, res) => {
   try {
     // Query to get groups and teams ordered by Pts
     const query = `
-      SELECT Groups.name as groupName, Teams.logo as logo, Teams.name as teamName, Teams.W, Teams.D, Teams.L, Teams.Pts
-        FROM Teams
-        JOIN Groups ON Teams.group_Id = Groups.id
-        ORDER BY Groups.name, Teams.Pts DESC
+      SELECT 
+          Groups.name AS groupName, 
+          Teams.logo AS logo, 
+          Teams.name AS teamName, 
+          Teams.id AS teamId, 
+          Teams.W, 
+          Teams.D, 
+          Teams.L, 
+          Teams.Pts,
+          IFNULL(AggregatedScores.AggregatedScore, 0) AS totalScore
+      FROM Teams
+      JOIN Groups ON Teams.group_Id = Groups.id
+      LEFT JOIN (
+          SELECT 
+              TeamId, 
+              SUM(Score) AS AggregatedScore
+          FROM (
+              SELECT 
+                  team1_id AS TeamId, 
+                  score_team1 AS Score
+              FROM Matches
+              WHERE match_type = 'First_round'
+
+              UNION ALL
+
+              SELECT 
+                  team2_id AS TeamId, 
+                  score_team2 AS Score
+              FROM Matches
+              WHERE match_type = 'First_round'
+          ) AS Combined
+          GROUP BY TeamId
+      ) AS AggregatedScores ON Teams.id = AggregatedScores.TeamId
+      ORDER BY Groups.name, Teams.Pts DESC, totalScore DESC;
     `;
 
     const [rows] = await db.query(query);
